@@ -1,18 +1,26 @@
-"""postpy2 extractors."""
-import logging
+"""postpy2 extractors. (coverfox_modified)
+8-Mar-2023
+This is modified version of postpy2 library
+(we are preventing usage of
+request_override,
+any file operations,
+external libraries that are not already included in our requirements
+)
+"""
 import json
-import ntpath
-import os
-from io import BytesIO
+import logging
 
-import magic
+# import ntpath
+# import os
+# from io import BytesIO
+
+# import magic
 
 logger = logging.getLogger(__name__)
 
 
 def extract_dict_from_raw_mode_data(raw):
     """extract json to dictionay
-
     :param raw: jsondata
     :return: :extracted dict
     """
@@ -22,44 +30,44 @@ def extract_dict_from_raw_mode_data(raw):
         return {}
 
 
-def exctact_dict_from_files(data):
-    """extract files from dict data.
+# def exctact_dict_from_files(data):
+#     """extract files from dict data.
 
-    :param data: [{"key":"filename", "src":"relative/absolute path to file"}]
-    :return: :tuple of file metadata for requests library
-    """
-    if not os.path.isfile(data["src"]):
-        raise Exception("File " + data["src"] + " does not exists")
-    mime = magic.Magic(mime=True)
-    file_mime = mime.from_file(data["src"])
-    file_name = ntpath.basename(data["src"])
-    with open(data["src"], "rb") as file_source:
-        bytes_source = BytesIO(file_source.read())  # read bytes from file into memory
-    return (
-        file_name,
-        bytes_source,
-        file_mime,
-        {
-            "Content-Disposition": 'form-data; name="' + data["key"] + '"; filename="' + file_name + '"',
-            "Content-Type": file_mime,
-        },
-    )
+#     :param data: [{"key":"filename", "src":"relative/absolute path to file"}]
+#     :return: :tuple of file metadata for requests library
+#     """
+#     if not os.path.isfile(data["src"]):
+#         raise Exception("File " + data["src"] + " does not exists")
+#     mime = magic.Magic(mime=True)
+#     file_mime = mime.from_file(data["src"])
+#     file_name = ntpath.basename(data["src"])
+#     with open(data["src"], "rb") as file_source:
+#         bytes_source = BytesIO(file_source.read())  # read bytes from file into memory
+#     return (
+#         file_name,
+#         bytes_source,
+#         file_mime,
+#         {
+#             "Content-Disposition": 'form-data; name="' + data["key"] + '"; filename="' + file_name + '"',
+#             "Content-Type": file_mime,
+#         },
+#     )
 
 
-def extract_dict_from_formdata_mode_data(formdata):
-    """Extract dict from formdata mode data."""
-    data = {}
-    files = {}
-    try:
-        for row in formdata:
-            if row["type"] == "text":
-                data[row["key"]] = row["value"]
-            if row["type"] == "file":
-                files[row["key"]] = exctact_dict_from_files(row)
-        return data, files
-    except Exception as err:  # pylint: disable=W0703
-        logger.info("extact from formdata_mode_data error occurred: %s", err)
-        return data, files
+# def extract_dict_from_formdata_mode_data(formdata):
+#     """Extract dict from formdata mode data."""
+#     data = {}
+#     files = {}
+#     try:
+#         for row in formdata:
+#             if row["type"] == "text":
+#                 data[row["key"]] = row["value"]
+#             if row["type"] == "file":
+#                 files[row["key"]] = exctact_dict_from_files(row)
+#         return data, files
+#     except Exception as err:  # pylint: disable=W0703
+#         logger.info("extact from formdata_mode_data error occurred: %s", err)
+#         return data, files
 
 
 def extract_dict_from_headers(data):
