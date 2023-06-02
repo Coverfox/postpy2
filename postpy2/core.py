@@ -21,19 +21,12 @@ from copy import copy
 
 import requests
 
-from .postpy_extractors import (  # extract_dict_from_formdata_mode_data,; exctact_dict_from_files,
+from postpy2.extractors import (
     extract_dict_from_headers,
     extract_dict_from_raw_mode_data,
     format_object,
 )
 
-# import pprint
-
-
-# from mergedeep import merge
-
-
-# pp = pprint.PrettyPrinter(indent=4)
 logger = logging.getLogger(__name__)
 TOP_REQUESTS = "Root"
 
@@ -49,10 +42,6 @@ class CaseSensitiveDict(dict):
 
     def load(self, postman_enviroment_json):
         """Load from env file."""
-        # with open(
-        #     postman_enviroment_file_path,
-        #     encoding="utf8",
-        # ) as postman_enviroment_file:
         postman_enviroment = json.load(postman_enviroment_json)
         for item in postman_enviroment["values"]:
             if item["enabled"]:
@@ -72,14 +61,10 @@ class CaseSensitiveDict(dict):
 class PostPython:
     """Postman Collections 2.1 Python class."""
 
-    # def __init__(self, postman_collection_file_path, request_overrides=None):
     def __init__(self, postman_collection_json):
-        # with open(postman_collection_file_path, encoding="utf8") as postman_collection_file:
-        #     self.__postman_collection = json.load(postman_collection_file)
         self.__postman_collection = json.loads(postman_collection_json)
         self.__folders = {}
         self.environments = CaseSensitiveDict()
-        # self.request_overrides = request_overrides
         self.__load()
 
     def __enter__(self):
@@ -229,11 +214,6 @@ class PostRequest:
                 request_data["body"]["raw"],
             )
 
-        # if "body" in request_data and request_data["body"]["mode"] == "formdata" and "formdata" in request_data["body"]:
-        #     (
-        #         self.request_kwargs["data"],
-        #         self.request_kwargs["files"],
-        #     ) = extract_dict_from_formdata_mode_data(request_data["body"]["formdata"])
 
         if "body" in request_data and request_data["body"]["mode"] == "graphql":
             # Graphql support
@@ -272,8 +252,6 @@ class PostRequest:
         logger.debug(args)
         current_request_kwargs = copy(self.request_kwargs)
         logger.debug("current_request_kwargs: %s", current_request_kwargs)
-        # if self.post_python.request_overrides:
-        #     current_request_kwargs = merge(current_request_kwargs, self.post_python.request_overrides)
 
         new_env = copy(self.post_python.environments)
         new_env.update(kwargs)
@@ -342,16 +320,10 @@ class PostRequest:
                     "Authorization"
                 ] = f"Basic {base64.b64encode(combined_string.encode()).decode()}"
             else:
-                # logger.debug(pprint.pformat(auth))
-                # raise Exception(f"Auth type not supported: {pprint.pformat(auth)}")
                 logger.debug(auth)
                 raise Exception(f"Auth type not supported: {auth}")
         return formatted_kwargs
 
-    # def set_files(self, data):
-    #     """Add files to request args dict."""
-    #     for row in data:
-    #         self.request_kwargs["files"][row["key"]] = exctact_dict_from_files(row)
 
     def set_data(self, data):
         """Add data to request args dict."""
