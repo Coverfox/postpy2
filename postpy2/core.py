@@ -40,8 +40,19 @@ class CaseSensitiveDict(dict):
         for key, value in d.items():
             self[key] = value
 
-    def load(self, postman_enviroment_json):
+    def load(self, postman_enviroment_file_path):
         """Load from env file."""
+        with open(
+             postman_enviroment_file_path,
+             encoding="utf8",
+        ) as postman_enviroment_file:
+            postman_enviroment = json.load(postman_enviroment_file)
+        for item in postman_enviroment["values"]:
+            if item["enabled"]:
+                self[item["key"]] = item["value"]
+
+    def load_json(self, postman_enviroment_json):
+        """Load from json postman collection instead of file."""
         postman_enviroment = json.load(postman_enviroment_json)
         for item in postman_enviroment["values"]:
             if item["enabled"]:
